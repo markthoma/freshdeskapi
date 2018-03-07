@@ -3,6 +3,12 @@
 import requests
 import datetime
 
+def api_key():
+    print('getting api...')
+    with open("/home/mark/Documents/Freshdesk/FreshdeskAPI/freshdesk_api/freshdesk_api_key.txt",'r') as f:
+        api_key = f.read()
+        return api_key.rstrip()
+
 def check_status(response):
     #  Check all response status codes
     #  with this function.
@@ -34,20 +40,6 @@ def to_json(response):
 def generate_time_delta(days):
     time_delta = datetime.datetime.today() - datetime.timedelta(days=days)
     return time_delta
-
-def get_companies(base_url, auth_tuple):
-    companies_data = []
-    response = requests.get(
-        '{0}/api/v2/companies?per_page=100'.format(base_url),
-        auth=auth_tuple
-    )
-    response_json = to_json(response)
-    return [
-        {
-            'name': company['name'],
-            'id': company['id']
-        } for company in response_json
-    ]
 
 def get_all_objects(resource, base_url, AUTH_TUPLE, extra_filter=None):
     object_list = []

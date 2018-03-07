@@ -26,7 +26,7 @@ def main():
     MIMEText(body, 'plain')) # or 'html'
 
     # List of attachments
-    attachments = ['/home/mark/Documents/Freshdesk/FreshdeskAPI/unverifiededcontacts.txt']
+    attachments = ['/home/mark/Documents/Freshdesk/FreshdeskAPI/unverifiededcontacts.csv']
 
     # Add the attachments to the message
     for file in attachments:

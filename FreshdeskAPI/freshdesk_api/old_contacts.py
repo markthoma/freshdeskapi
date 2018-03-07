@@ -4,17 +4,19 @@ import requests
 import datetime
 import json
 import sys
+import csv
 from freshdesk import (
     to_json,
     generate_time_delta,
     get,
-    get_companies,
-    get_all_objects
+    get_all_objects,
+    api_key
 )
 from urllib.parse import urlencode
 
 BASE_URL = 'https://osirium.freshdesk.com'
-AUTH_TUPLE = (input('API Key: '), 'xxxx')
+AUTH_TUPLE = (api_key(), 'xxxx')
+filename = '/home/mark/Documents/Freshdesk/FreshdeskAPI/oldcontacts.csv'
 
 def all_contacts():
     contact_list = get_all_objects('contacts', BASE_URL, AUTH_TUPLE)
@@ -34,18 +36,33 @@ def get_contact_company_name(company_list, contact):
             return company['name']
     return None
 
+def all_companies():
+    company_list = get_all_objects('companies', BASE_URL, AUTH_TUPLE)
+    return company_list
+
+def create_csv(old_contacts, company_list, time_delta):
+    with open(filename,'w+', newline='') as f:
+        writer = csv.writer(f, delimiter=',')
+        writer.writerow(['Contacts older than ' + str(time_delta.strftime("%Y-%m-%d")) + ' as of ' + datetime.datetime.now().strftime("%Y-%m-%d")])
+        writer.writerow(['Name', 'eMail', 'Company', 'Created At', 'Last Updated'])
+        for contact in old_contacts:
+                company_name = get_contact_company_name(company_list, contact)
+                contact_info = [contact['name'],
+                                contact['email'],
+                                company_name,
+                                contact['created_at'],
+                                contact['updated_at']
+                                ]
+                writer.writerow(contact_info)
+
+
 if __name__ == '__main__':
 
     time_delta = generate_time_delta(180)
-    company_list = get_companies(BASE_URL, AUTH_TUPLE)
+    print('getting companies...')
+    company_list = all_companies()
+    print('getting contacts...')
     contact_list = all_contacts()
+    print('getting old contacts...')
     old_contacts = get_old_objects(contact_list, time_delta)
-    contact_id = 1
-    for contact in old_contacts:
-        print("\nID: ", contact_id)
-        print("Name: ", contact['name'])
-        company_name = get_contact_company_name(company_list, contact)
-        print("Company: ", company_name)
-        print("Created At: ", contact['created_at'])
-        print("Last Updated: ", contact['updated_at'])
-        contact_id = contact_id + 1
+    create_csv(old_contacts, company_list, time_delta)

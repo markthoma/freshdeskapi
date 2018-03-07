@@ -5,30 +5,20 @@ import datetime
 import json
 import sys
 from urllib.parse import urlencode
+from difflib import get_close_matches
 from freshdesk import (
     to_json,
     generate_time_delta,
     get,
-    get_companies,
-    get_all_objects
+    get_all_objects,
+    api_key
 )
 
 BASE_URL = 'https://osirium.freshdesk.com'
-AUTH_TUPLE = (input('API Key: '), 'xxxx')
+AUTH_TUPLE = (api_key(), 'xxxx')
 
 def display_companies():
     return '\n'.join([company['name'] for company in all_companies()])
-
-def get_companies():
-    companies_data = []
-    response = requests.get(
-        '{0}/api/v2/companies?per_page=100'.format(BASE_URL),
-        auth=AUTH_TUPLE
-    )
-    response_json = to_json(response)
-    return [
-        {'name': company['name'], 'id': company['id']} for company in response_json
-    ]
 
 def all_companies():
     company_list = get_all_objects('companies', BASE_URL, AUTH_TUPLE)
@@ -43,12 +33,24 @@ def validate_company_name():
             if company['name'].lower() == user_company.lower():
                 return company['id']
                 valid_company = True
+            else:
+                company_names = []
+                for company in companies_data:
+                    company_names.append(company['name'])
+                if len(get_close_matches(user_company.lower(), company_names)) > 0:
+                    try_again = input("Did you mean %a instead? Enter Y if yes, or N if no: " % get_close_matches(user_company.lower(), company_names)[0])
+                    if try_again.lower() == 'y':
+                        return company['id']
+                        valid_company = True
+                    else:
+                        break
         print("Name {0} not found in companies list.".format(user_company))
         try_again = input("Try again? [no] ")
         if try_again.lower().startswith("y"):
             continue
         else:
             sys.exit()
+
 
 def all_tickets(company_id):
     extra_filter = '&company_id=' + str(company_id)
