@@ -9,6 +9,11 @@ def api_key():
         api_key = f.read()
         return api_key.rstrip()
 
+def smtp_det():
+    with open("/home/mark/Documents/Freshdesk/FreshdeskAPI/freshdesk_api/smtp_det.txt",'r') as f:
+        smtp_det = f.read()
+        return smtp_det.rstrip()
+
 def check_status(response):
     #  Check all response status codes
     #  with this function.

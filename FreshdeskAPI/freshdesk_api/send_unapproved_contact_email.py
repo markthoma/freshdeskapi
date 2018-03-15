@@ -7,13 +7,14 @@ from email import encoders
 from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
+from freshdesk import smtp_det
 
 COMMASPACE = ', '
 
 def main():
-    sender = os.environ.get('SMTP_USER', None)
-    password = os.environ.get('SMTP_PASSWORD', None)
-    recipients = ['mark.thomas@osirium.com']
+    sender = 'osiriumbot'
+    password = smtp_det()
+    recipients = ['mark.thomas@osirium.com','martin.mccloud@osirium.com']
 
     # Create the enclosing (outer) message
     outer = MIMEMultipart()
